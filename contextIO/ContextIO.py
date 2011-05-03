@@ -24,6 +24,7 @@ THE SOFTWARE.
 import time
 import oauth2 as oauth
 import httplib2
+import collections
 from urllib import quote
 
 from contextIO.ContextIOResponse import ContextIOResponse
@@ -72,7 +73,10 @@ class ContextIORequester(httplib2.Http):
             context['account'] = self.account
 
         for key in context:
-            url += '%s=%s&' % (key, quote(context[key]))
+            if isinstance(context[key],collections.Iterable):
+                url += '%s=%s&' % (key, quote(context[key]))
+            else:
+                url += '%s=%s&' % (key, context[key])
 
         return url
 
