@@ -486,6 +486,27 @@ class IMAPAdmin(object):
         context = {'account':account}
         return self._get_response('imap/removeaccount.json', context)
 
+    def delete_oauth_provider(self, key=''):
+        context = {
+            'key': key,
+            'action': 'delete'
+        }
+        return self._post_response('imap/oauthproviders.json', context)
+
+    def set_oauth_provider(self, type='', key='', secret=''):
+        context = {
+            'key': key,
+            'secret': secret,
+            'type': type
+        }
+        return self._post_response('imap/oauthproviders.json', context)
+
+    def get_oauth_providers(self, key=''):
+        context = { }
+        if key:
+            context['key'] = key
+        return self._get_response('imap/oauthproviders.json', context)
+
     def reset_status(self, account):
         """
         see http://context.io/docs/1.1/imap/resetstatus
