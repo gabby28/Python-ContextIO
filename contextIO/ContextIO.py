@@ -202,6 +202,13 @@ class ContextIO(object):
                                   limit,
                                   account)
 
+    def contactsearch(self, search='', account=None):
+        """
+        see http://context.io/docs/1.1/contactsearch
+        """
+        context = {'search': search}
+        return self._get_response('contactsearch', context, account=account)
+
     def diffsummary(self, file_id1, file_id2, account):
         """
         see http://context.io/docs/1.1/diffsummmary
