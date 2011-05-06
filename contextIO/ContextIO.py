@@ -395,7 +395,8 @@ class IMAPAdmin(object):
     def account_info(self,email):
         return self._get_response('imap/accountinfo.json', {'email':email})
 
-    def add_account(self, email, username, password, firstname='', lastname='',
+    def add_account(self, email, username, password='', firstname='', lastname='',
+                    oauthtoken='', oauthconsumername='', oauthtokensecret='',
                     server='imap.gmail.com', usessl=True, port=993):
         """
         see http://context.io/docs/1.1/imap/addaccount
@@ -403,11 +404,18 @@ class IMAPAdmin(object):
         context = {
             'email': email,
             'username': username,
-            'password': password,
             'server': server,
             'usessl': '1' if usessl else '0',
             'port': '%s' % port
         }
+        if password:
+            context['password'] = password
+        if oauthtoken:
+            context['oauthtoken'] = oauthtoken
+        if oauthconsumername:
+            context['oauthconsumername'] = oauthconsumername
+        if oauthtokensecret:
+            context['oauthtokensecret'] = oauthtokensecret
         if firstname:
             context['firstname']= firstname
         if lastname:
