@@ -61,12 +61,12 @@ class ContextIORequester(httplib2.Http):
                                context,
                                account)
 
-    def build_url(self,
-                   action,
-                   context,
-                   account=None):
-        url = '%s/%s/%s?' % (self.api_url, self.api_version, action)
+    def build_base_url(self, action):
+        url = '%s/%s/%s' % (self.api_url, self.api_version, action)
+        return url
 
+    def build_query_string(self, context, account=None):
+        queryString = ''
         if account:
             context['account'] = account
         elif self.account:
@@ -74,10 +74,13 @@ class ContextIORequester(httplib2.Http):
 
         for key in context:
             if isinstance(context[key],collections.Iterable):
-                url += '%s=%s&' % (key, quote(context[key]))
+                queryString += '%s=%s&' % (key, quote(context[key]))
             else:
-                url += '%s=%s&' % (key, context[key])
+                queryString += '%s=%s&' % (key, context[key])
+        return queryString
 
+    def build_url(self, action, context, account=None):
+        url = self.build_base_url(action) + "?" + self.build_query_string(context, account)
         return url
 
     def get_response(self,
@@ -100,6 +103,35 @@ class ContextIORequester(httplib2.Http):
                                         method="GET",
                                         body='',
                                         headers={},
+                                        redirections=httplib2.DEFAULT_MAX_REDIRECTS,
+                                        connection_type=None)
+        if response['status'] != '200':
+            raise Exception("Invalid response %s" % response['status'])
+        return ContextIOResponse(response, content)
+
+    def post_response_for_url(self, url, context, account):
+        parameters = self.params
+        parameters['oauth_nonce'] = oauth.generate_nonce()
+        parameters['oauth_timestamp'] = '%s' % int(time.time())
+        if account:
+            parameters['account'] = account
+        elif self.account:
+            parameters['account'] = self.account
+
+        for key in context:
+            if isinstance(context[key],collections.Iterable):
+                parameters[key] = quote(context[key])
+            else:
+                parameters[key] = context[key]
+
+        req = oauth.Request(method="POST", url=url, parameters=parameters)
+        # Sign the request.
+        signature_method = oauth.SignatureMethod_HMAC_SHA1()
+        req.sign_request(signature_method, self.consumer, None)
+        response, content = self.request(url,
+                                        method="POST",
+                                        body=req.to_postdata(),
+                                        headers={'Content-Type': 'application/x-www-form-urlencoded'},
                                         redirections=httplib2.DEFAULT_MAX_REDIRECTS,
                                         connection_type=None)
         if response['status'] != '200':
@@ -391,6 +423,10 @@ class IMAPAdmin(object):
     def _get_response(self, action, context,account=None):
         url = self.requester.build_url(action, context,account=account)
         return self.requester.get_response_for_url(url)
+
+    def _post_response(self, action, context,account=None):
+        url = self.requester.build_base_url(action)
+        return self.requester.post_response_for_url(url,context,account)
 
     def account_info(self,email):
         return self._get_response('imap/accountinfo.json', {'email':email})
