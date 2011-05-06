@@ -438,3 +438,5 @@ class IMAPAdmin(object):
         """
         context = {'account':account}
         return self._get_response('imap/resetstatus.json', context)
+
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4
