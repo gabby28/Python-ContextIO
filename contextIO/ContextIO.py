@@ -385,6 +385,9 @@ class IMAPAdmin(object):
         url = self.requester.build_url(action, context,account=account)
         return self.requester.get_response_for_url(url)
 
+    def account_info(self,email):
+        return self._get_response('imap/accountinfo.json', {'email':email})
+
     def add_account(self, email, username, password, firstname='', lastname='',
                     server='imap.gmail.com', usessl=True, port=993):
         """
