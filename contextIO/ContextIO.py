@@ -428,8 +428,13 @@ class IMAPAdmin(object):
         url = self.requester.build_base_url(action)
         return self.requester.post_response_for_url(url,context,account)
 
-    def account_info(self,email):
-        return self._get_response('imap/accountinfo.json', {'email':email})
+    def account_info(self, email='',userid=''):
+        context = {}
+        if email:
+            context['email'] = email
+        if userid:
+            context['userid'] = userid
+        return self._get_response('imap/accountinfo.json', context)
 
     def add_account(self, email, username, password='', firstname='', lastname='',
                     oauthtoken='', oauthconsumername='', oauthtokensecret='',
