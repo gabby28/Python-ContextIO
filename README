@@ -9,6 +9,7 @@ documentation is available at http://context.io/docs/1.1
 
 REQUIREMENTS
 
+Python >= 2.6
 Python oauth2 (https://github.com/simplegeo/python-oauth2)
 
 
